@@ -1,0 +1,1145 @@
+  <!doctype html>
+  <html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>20 Responsive Image Carousels (CSS + JS + jQuery)</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --fg: #14181f;
+        --mut: #5b6472;
+        --ac: #0f766e;
+        --bd: #d9dde3;
+        --card: #fff
+      }
+
+      @media(prefers-color-scheme:dark) {
+        :root {
+          --bg: #0e1116;
+          --fg: #e9ecf1;
+          --mut: #9aa3b2;
+          --bd: #2a313c;
+          --ac: #2dd4bf;
+          --card: #171c25
+        }
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif
+      }
+
+      /* header {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 16px 8px
+      } */
+
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(1.6rem, 5vw, 2.4rem)
+      }
+
+      header p,
+      .demo>p {
+        margin: 0 0 12px;
+        color: var(--mut)
+      }
+
+      .demo {
+        max-width: 1100px;
+        margin: 0 auto 44px;
+        padding: 0 16px
+      }
+
+      .demo>h2 {
+        margin: 0 0 2px;
+        font-size: 1.15rem
+      }
+
+      button:focus-visible {
+        outline: 3px solid var(--ac);
+        outline-offset: 2px
+      }
+
+      /* ===== SHARED: slide (any tag with class "sl") ===== */
+      .sl {
+        display: block;
+        position: relative;
+        margin: 0;
+        overflow: hidden;
+        border-radius: 14px;
+        aspect-ratio: 16/10;
+        background: var(--bd)
+      }
+
+      .sl img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block
+      }
+
+      .cap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 28px 14px 10px;
+        color: #fff;
+        font-weight: 600;
+        background: linear-gradient(transparent, rgba(0, 0, 0, .65))
+      }
+
+      .box {
+        position: relative
+      }
+
+      .ar {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, .55);
+        color: #fff;
+        font-size: 22px;
+        line-height: 1;
+        cursor: pointer;
+        z-index: 5
+      }
+
+      .ar.p {
+        left: 8px
+      }
+
+      .ar.n {
+        right: 8px
+      }
+
+      /* ===== SHARED: native scroll-snap track (1-8, 20) ===== */
+      .trk {
+        position: relative;
+        display: flex;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        overflow-x: auto;
+        scroll-snap-type: x proximity;
+        scrollbar-width: thin;
+        overscroll-behavior-x: contain
+      }
+
+      .trk.ns {
+        scroll-snap-type: none !important
+      }
+
+      .trk>* {
+        flex: 0 0 100%;
+        scroll-snap-align: start
+      }
+
+      /* 02, 07, 20 cards per view */
+      .cards {
+        --n: 1
+      }
+
+      .cards>* {
+        flex-basis: calc((100% - (var(--n) - 1)*12px)/var(--n))
+      }
+
+      @media(min-width:600px) {
+        .cards {
+          --n: 2
+        }
+      }
+
+      @media(min-width:900px) {
+        .cards {
+          --n: 3
+        }
+      }
+
+      @media(min-width:1100px) {
+        .cards {
+          --n: 4
+        }
+      }
+
+      .card {
+        aspect-ratio: auto;
+        background: var(--card);
+        border: 1px solid var(--bd)
+      }
+
+      .card img {
+        position: static;
+        height: auto;
+        aspect-ratio: 16/10
+      }
+
+      .card h3,
+      .card p {
+        margin: 10px 12px
+      }
+
+      .card p {
+        color: var(--mut);
+        margin-top: 0
+      }
+
+      /* 03 peek */
+      .peek {
+        padding: 0 10%
+      }
+
+      .peek>* {
+        flex-basis: 80%;
+        scroll-snap-align: center
+      }
+
+      /* 04 vertical */
+      .v {
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: 280px;
+        scroll-snap-type: y mandatory
+      }
+
+      .v>* {
+        flex: 0 0 100%;
+        aspect-ratio: auto
+      }
+
+      /* 05, 06 center effects */
+      .fx {
+        perspective: 900px;
+        gap: 0;
+        padding: 24px calc(50% - 130px)
+      }
+
+      .fx>* {
+        flex: 0 0 260px;
+        scroll-snap-align: center;
+        will-change: transform
+      }
+
+      /* 07 drag */
+      .drag {
+        cursor: grab;
+        user-select: none
+      }
+
+      .drag.on {
+        cursor: grabbing
+      }
+
+      /* 08 parallax image */
+      .par .sl img {
+        width: 130%;
+        left: -15%;
+        max-width: none
+      }
+
+      /* 20 progress */
+      .pg {
+        display: block;
+        width: 100%;
+        height: 5px;
+        margin-top: 10px;
+        border: 0;
+        border-radius: 3px;
+        appearance: none;
+        background: var(--bd);
+        color: var(--ac)
+      }
+
+      .pg::-webkit-progress-bar {
+        background: var(--bd);
+        border-radius: 3px
+      }
+
+      .pg::-webkit-progress-value {
+        background: var(--ac);
+        border-radius: 3px
+      }
+
+      .pg::-moz-progress-bar {
+        background: var(--ac)
+      }
+
+      /* ===== SHARED: jQuery slider (9-14, 17, 18) ===== */
+      .sx {
+        position: relative;
+        overflow: hidden;
+        border-radius: 14px;
+        touch-action: pan-y
+      }
+
+      .sx-in {
+        display: flex;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        transition: transform .6s cubic-bezier(.2, .7, .2, 1)
+      }
+
+      .sx .sl {
+        flex: 0 0 100%;
+        border-radius: 0
+      }
+
+      .sx.fade .sx-in,
+      .sx.stack .sx-in,
+      .sx.ring .sx-in {
+        display: block;
+        position: relative;
+        aspect-ratio: 16/10
+      }
+
+      .sx.fade .sl,
+      .sx.stack .sl,
+      .sx.ring .sl {
+        position: absolute;
+        inset: 0;
+        aspect-ratio: auto
+      }
+
+      .sx.fade .sl {
+        opacity: 0;
+        transition: opacity .8s
+      }
+
+      .sx.fade .sl.on {
+        opacity: 1
+      }
+
+      .zoom .sl img {
+        transition: transform 7s linear
+      }
+
+      .zoom .sl.on img {
+        transform: scale(1.2)
+      }
+
+      .zoom .sl:not(.on) img {
+        transition: none;
+        transform: scale(1)
+      }
+
+      .dots {
+        position: absolute;
+        bottom: 10px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        z-index: 4
+      }
+
+      .dots b {
+        width: 10px;
+        height: 10px;
+        border-radius: 99px;
+        background: rgba(255, 255, 255, .6);
+        cursor: pointer;
+        transition: width .3s
+      }
+
+      .dots b.on {
+        background: #fff;
+        width: 26px
+      }
+
+      .pb {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 4px;
+        background: #fff;
+        width: 0;
+        z-index: 4
+      }
+
+      .cnt {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        z-index: 4;
+        background: rgba(0, 0, 0, .55);
+        color: #fff;
+        border-radius: 99px;
+        padding: 2px 12px;
+        font-size: .8rem
+      }
+
+      .th {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        overflow-x: auto
+      }
+
+      .th img {
+        flex: 0 0 76px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        cursor: pointer;
+        opacity: .5
+      }
+
+      .th img.on {
+        opacity: 1;
+        outline: 2px solid var(--ac);
+        outline-offset: 2px
+      }
+
+      .sx.stack,
+      .sx.ring {
+        overflow: visible
+      }
+
+      .sx.stack {
+        padding-bottom: 30px
+      }
+
+      .sx.stack .sx-in {
+        width: calc(100% - 50px)
+      }
+
+      .sx.stack .sl {
+        border-radius: 14px;
+        cursor: pointer;
+        transition: transform .5s, opacity .5s
+      }
+
+      .sx.ring {
+        perspective: 1000px;
+        height: 240px
+      }
+
+      .sx.ring .sx-in {
+        width: 220px;
+        margin: 40px auto;
+        transform-style: preserve-3d;
+        transition: transform .8s
+      }
+
+      .sx.ring .sl {
+        border-radius: 12px;
+        backface-visibility: hidden
+      }
+
+      /* 13 testimonial slide */
+      .q {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        background: var(--card);
+        border: 1px solid var(--bd);
+        aspect-ratio: auto
+      }
+
+      .q .av {
+        position: static;
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        margin-bottom: 10px
+      }
+
+      .q p {
+        margin: 0 0 6px;
+        font-size: 1.1rem
+      }
+
+      .q footer {
+        color: var(--mut)
+      }
+
+      .qt .sx-in {
+        aspect-ratio: auto;
+        height: 290px
+      }
+
+      .qt .dots b {
+        background: var(--bd)
+      }
+
+      .qt .dots b.on {
+        background: var(--ac)
+      }
+
+      /* ===== 15 marquee (CSS only) ===== */
+      .mq {
+        overflow: hidden;
+        margin-bottom: 12px
+      }
+
+      .mq-tr {
+        display: flex;
+        gap: 12px;
+        width: max-content;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        animation: mq 35s linear infinite
+      }
+
+      .mq:hover .mq-tr {
+        animation-play-state: paused
+      }
+
+      .mq.rev .mq-tr {
+        animation-direction: reverse
+      }
+
+      .mq .sl {
+        flex: 0 0 220px
+      }
+
+      @keyframes mq {
+        to {
+          transform: translateX(calc(-50% - 6px))
+        }
+      }
+
+      /* ===== 16 page scroll drives sideways movement ===== */
+      .hs {
+        height: 260vh;
+        position: relative
+      }
+
+      .hs-st {
+        position: sticky;
+        top: 12vh;
+        height: 76vh;
+        overflow: hidden;
+        display: flex;
+        align-items: center
+      }
+
+      .hs-tr {
+        display: flex;
+        gap: 16px;
+        width: max-content;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        will-change: transform
+      }
+
+      .hs-tr .sl {
+        flex: 0 0 min(70vw, 420px)
+      }
+
+      /* ===== 19 expanding panels ===== */
+      .acc {
+        display: flex;
+        gap: 8px;
+        height: 300px
+      }
+
+      .acc .sl {
+        flex: 1;
+        min-width: 0;
+        aspect-ratio: auto;
+        cursor: pointer;
+        transition: flex .5s
+      }
+
+      .acc .sl.on {
+        flex: 4
+      }
+
+      .acc .cap {
+        opacity: 0;
+        transition: opacity .4s;
+        white-space: nowrap
+      }
+
+      .acc .on .cap {
+        opacity: 1
+      }
+
+      @media(max-width:600px) {
+        .acc {
+          flex-direction: column;
+          height: 400px
+        }
+      }
+
+      @media(prefers-reduced-motion:reduce) {
+        * {
+          animation: none !important;
+          transition: none !important
+        }
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+      /* ============ SHARED JS (used by several examples) ============ */
+
+      /* Placeholder pictures. Remove this and put real paths in src="images/photo1.jpg" */
+      function ph(n) {
+        var h = (n * 47 + 200) % 360;
+        return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="hsl(' + h + ',65%,50%)"/><stop offset="1" stop-color="hsl(' + (h + 50) + ',65%,35%)"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><text x="400" y="290" font-size="140" font-family="sans-serif" font-weight="700" fill="#fff" text-anchor="middle">' + n + '</text></svg>')
+      }
+      $(document).on('DOMContentLoaded', function () { });
+      $(function () { $('img[data-ph]').each(function () { this.src = ph(this.dataset.ph) }) });
+
+      /* Native tracks: adds arrows + turns the mouse wheel into sideways scroll */
+      function nat(sel) {
+        var $b = $(sel), t = $b.find('.trk')[0];
+        function mv(d) { t.scrollBy({ left: d * t.clientWidth * .8, behavior: 'smooth' }) }
+        $b.append($('<button class="ar p" aria-label="Previous">&#8249;</button>').click(function () { mv(-1) }),
+          $('<button class="ar n" aria-label="Next">&#8250;</button>').click(function () { mv(1) }));
+        $(t).on('wheel', function (e) {
+          var o = e.originalEvent, mx = t.scrollWidth - t.clientWidth, l = t.scrollLeft;
+          if (Math.abs(o.deltaY) <= Math.abs(o.deltaX) || mx <= 0) return;
+          if ((o.deltaY > 0 && l < mx - 1) || (o.deltaY < 0 && l > 0)) {
+            e.preventDefault();
+            $(t).addClass('ns'); clearTimeout(t._t); t._t = setTimeout(function () { $(t).removeClass('ns') }, 160);
+            t.scrollLeft = l + o.deltaY
+          }
+        })
+      }
+
+      /* jQuery slider plugin: modes slide | fade | stack | ring */
+      $.fn.sx = function (o) {
+        o = o || {}; return this.each(function () {
+          var m = o.mode || 'slide', $r = $(this).addClass(m + ' ' + (o.cls || '')), $in = $r.find('.sx-in'), $s = $in.children(),
+            n = $s.length, i = 0, tm, sx, $d, $pb, $th, $c;
+          function go(k) { i = (k + n) % n; draw() }
+          function draw() {
+            $s.removeClass('on').eq(i).addClass('on');
+            if (m == 'slide') $in.css('transform', 'translateX(' + (-i * 100) + '%)');
+            if (m == 'stack') $s.each(function (k) {
+              var d = (k - i + n) % n;
+              $(this).css({ zIndex: n - d, opacity: d > 3 ? 0 : 1, transform: 'translate(' + d * 14 + 'px,' + d * 10 + 'px) scale(' + (1 - d * .05) + ')' })
+            });
+            if (m == 'ring') {
+              var a = 360 / n; $in.css('transform', 'translateZ(-200px) rotateY(' + (-i * a) + 'deg)');
+              $s.each(function (k) { $(this).css('transform', 'rotateY(' + k * a + 'deg) translateZ(200px)') })
+            }
+            if ($d) $d.children().removeClass('on').eq(i).addClass('on');
+            if ($th) $th.children().removeClass('on').eq(i).addClass('on');
+            if ($c) $c.text((i + 1) + ' / ' + n);
+            if (o.auto) {
+              clearTimeout(tm);
+              if ($pb) $pb.stop(true).css('width', 0).animate({ width: '100%' }, o.auto, 'linear');
+              tm = setTimeout(function () { go(i + 1) }, o.auto)
+            }
+          }
+          $r.append($('<button class="ar p" aria-label="Previous">&#8249;</button>').click(function () { go(i - 1) }),
+            $('<button class="ar n" aria-label="Next">&#8250;</button>').click(function () { go(i + 1) }));
+          if (o.dots) { $d = $('<nav class="dots"/>'); $s.each(function (k) { $d.append($('<b/>').click(function () { go(k) })) }); $r.append($d) }
+          if (o.bar) { $pb = $('<i class="pb"/>'); $r.append($pb) }
+          if (o.count) { $c = $('<span class="cnt"/>'); $r.append($c) }
+          if (o.thumbs) {
+            $th = $('<nav class="th"/>').insertAfter($r);
+            $s.each(function (k) { var im = $(this).find('img')[0], t = $('<img alt="">').attr('src', im.dataset.ph ? ph(im.dataset.ph) : im.src).click(function () { go(k) }); $th.append(t) })
+          }
+          if (m == 'stack') $s.click(function () { go(i + 1) });
+          if (o.auto) $r.on('mouseenter', function () { clearTimeout(tm); if ($pb) $pb.stop(true) }).on('mouseleave', draw);
+          $r.on('touchstart', function (e) { sx = e.originalEvent.touches[0].clientX })
+            .on('touchend', function (e) { var dx = e.originalEvent.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1)) });
+          if (o.wheel) {
+            var lk = 0; $r.on('wheel', function (e) {
+              var d = e.originalEvent.deltaY; if (!d || lk) return;
+              e.preventDefault(); lk = 1; setTimeout(function () { lk = 0 }, 600); go(i + (d > 0 ? 1 : -1))
+            })
+          }
+          draw();
+        })
+      };
+    </script>
+  </head>
+
+  <body>
+    <header>
+      <h1>20 responsive image carousels</h1>
+      <p>Every example has its own markup (different tags, real <code>&lt;img&gt;</code> elements) and its own JS block.
+        Scroll, swipe or drag each one; the mouse wheel over a carousel moves it sideways and page scroll continues at the
+        ends. Pictures are generated placeholders: replace each <code>data-ph="n"</code> with
+        <code>src="images/your-photo.jpg"</code>.</p>
+    </header>
+    <main>
+
+      <!-- ================= 01 Native scroll-snap  (section > ul > li) ================= -->
+      <section class="demo">
+        <h2>1. Native scroll-snap</h2>
+        <p>Pure CSS snapping. JS only adds arrows and wheel support.</p>
+        <section class="box" id="c1">
+          <ul class="trk">
+            <li class="sl"><img data-ph="1" alt="Photo 1"><span class="cap">Photo 1</span></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"><span class="cap">Photo 2</span></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"><span class="cap">Photo 3</span></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"><span class="cap">Photo 4</span></li>
+          </ul>
+        </section>
+        <script>/* JS 01 */ nat('#c1');</script>
+      </section>
+
+      <!-- ================= 02 Responsive cards  (article > section cards) ================= -->
+      <section class="demo">
+        <h2>2. Responsive cards</h2>
+        <p>1 / 2 / 3 / 4 cards per view depending on screen width.</p>
+        <article class="box" id="c2">
+          <section class="trk cards">
+            <article class="sl card"><img data-ph="1" alt="Photo 1">
+              <h3>Maize</h3>
+              <p>Short description text.</p>
+            </article>
+            <article class="sl card"><img data-ph="2" alt="Photo 2">
+              <h3>Makhana</h3>
+              <p>Short description text.</p>
+            </article>
+            <article class="sl card"><img data-ph="3" alt="Photo 3">
+              <h3>Spices</h3>
+              <p>Short description text.</p>
+            </article>
+            <article class="sl card"><img data-ph="4" alt="Photo 4">
+              <h3>Jaggery</h3>
+              <p>Short description text.</p>
+            </article>
+            <article class="sl card"><img data-ph="5" alt="Photo 5">
+              <h3>Rice</h3>
+              <p>Short description text.</p>
+            </article>
+            <article class="sl card"><img data-ph="6" alt="Photo 6">
+              <h3>Pulses</h3>
+              <p>Short description text.</p>
+            </article>
+          </section>
+        </article>
+        <script>/* JS 02 */ nat('#c2');</script>
+      </section>
+
+      <!-- ================= 03 Peek  (aside > ol > li) ================= -->
+      <section class="demo">
+        <h2>3. Peek carousel</h2>
+        <p>Centered slide with its neighbours peeking in.</p>
+        <aside class="box" id="c3">
+          <ol class="trk peek">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+          </ol>
+        </aside>
+        <script>/* JS 03 */ nat('#c3');</script>
+      </section>
+
+      <!-- ================= 04 Vertical  (article > ul > li) ================= -->
+      <section class="demo">
+        <h2>4. Vertical scroll-snap</h2>
+        <p>Scrolls up and down inside a fixed-height box. No JS needed.</p>
+        <article class="box">
+          <ul class="trk v">
+            <li class="sl"><img data-ph="1" alt="Photo 1"><span class="cap">Photo 1</span></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"><span class="cap">Photo 2</span></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"><span class="cap">Photo 3</span></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"><span class="cap">Photo 4</span></li>
+          </ul>
+        </article>
+      </section>
+
+      <!-- ================= 05 Coverflow  (section > ol > li) ================= -->
+      <section class="demo">
+        <h2>5. Coverflow (scroll-linked 3D)</h2>
+        <p>Rotation and scale follow the scroll position.</p>
+        <section class="box" id="c5">
+          <ol class="trk fx">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+            <li class="sl"><img data-ph="6" alt="Photo 6"></li>
+          </ol>
+        </section>
+        <script>/* JS 05 */
+          (function () {
+            var t = $('#c5 .trk'), el = t[0];
+            function f() {
+              t.children().each(function () {
+                var d = (this.offsetLeft + this.offsetWidth / 2 - el.scrollLeft - el.clientWidth / 2) / this.offsetWidth, a = Math.min(Math.abs(d), 1.5);
+                this.style.transform = 'rotateY(' + (-Math.max(-1.5, Math.min(1.5, d)) * 40) + 'deg) scale(' + (1 - a * .12) + ')';
+                this.style.opacity = 1 - a * .3
+              })
+            }
+            t.on('scroll', f); $(window).on('resize', f); f(); nat('#c5');
+          })();
+        </script>
+      </section>
+
+      <!-- ================= 06 Scale on center  (aside > ul > li) ================= -->
+      <section class="demo">
+        <h2>6. Scale on center</h2>
+        <p>The picture nearest the middle grows; the rest shrink and fade.</p>
+        <aside class="box" id="c6">
+          <ul class="trk fx">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+            <li class="sl"><img data-ph="6" alt="Photo 6"></li>
+          </ul>
+        </aside>
+        <script>/* JS 06 */
+          (function () {
+            var t = $('#c6 .trk'), el = t[0];
+            function f() {
+              t.children().each(function () {
+                var d = Math.min(Math.abs((this.offsetLeft + this.offsetWidth / 2 - el.scrollLeft - el.clientWidth / 2) / this.offsetWidth), 1);
+                this.style.transform = 'scale(' + (1.05 - d * .3) + ')'; this.style.opacity = 1 - d * .45
+              })
+            }
+            t.on('scroll', f); $(window).on('resize', f); f(); nat('#c6');
+          })();
+        </script>
+      </section>
+
+      <!-- ================= 07 Drag to scroll  (nav > section > a) ================= -->
+      <section class="demo">
+        <h2>7. Drag to scroll</h2>
+        <p>Grab with the mouse and drag. Touch uses native swipe. Each picture is a link.</p>
+        <nav class="box" id="c7">
+          <section class="trk cards drag">
+            <a class="sl" href="#p1"><img data-ph="1" alt="Photo 1"></a>
+            <a class="sl" href="#p2"><img data-ph="2" alt="Photo 2"></a>
+            <a class="sl" href="#p3"><img data-ph="3" alt="Photo 3"></a>
+            <a class="sl" href="#p4"><img data-ph="4" alt="Photo 4"></a>
+            <a class="sl" href="#p5"><img data-ph="5" alt="Photo 5"></a>
+            <a class="sl" href="#p6"><img data-ph="6" alt="Photo 6"></a>
+          </section>
+        </nav>
+        <script>/* JS 07 */
+          (function () {
+            var t = $('#c7 .trk'), el = t[0], moved = 0;
+            t.on('mousedown', function (e) {
+              var x = e.pageX, l = el.scrollLeft; moved = 0; t.addClass('ns on');
+              $(document).on('mousemove.c7', function (e) { moved = Math.abs(e.pageX - x); el.scrollLeft = l - (e.pageX - x) })
+                .one('mouseup', function () { $(document).off('mousemove.c7'); t.removeClass('ns on') })
+            });
+            t.on('click', 'a', function (e) { if (moved > 5) e.preventDefault() });  /* a drag is not a click */
+            t.on('dragstart', function (e) { e.preventDefault() });
+            nat('#c7');
+          })();
+        </script>
+      </section>
+
+      <!-- ================= 08 Parallax image  (section > ul > li) ================= -->
+      <section class="demo">
+        <h2>8. Parallax image</h2>
+        <p>The picture inside each frame slides at a different speed than the frame.</p>
+        <section class="box" id="c8">
+          <ul class="trk peek par">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+          </ul>
+        </section>
+        <script>/* JS 08 */
+          (function () {
+            var t = $('#c8 .trk'), el = t[0];
+            function f() {
+              t.children().each(function () {
+                var d = (this.offsetLeft + this.offsetWidth / 2 - el.scrollLeft - el.clientWidth / 2) / this.offsetWidth;
+                $(this).find('img').css('transform', 'translateX(' + (-d * 40) + 'px)')
+              })
+            }
+            t.on('scroll', f); $(window).on('resize', f); f(); nat('#c8');
+          })();
+        </script>
+      </section>
+
+      <!-- ================= 09 Slider: arrows, dots, swipe, wheel  (section > ul > li) ================= -->
+      <section class="demo">
+        <h2>9. jQuery slider: arrows, dots, swipe, wheel</h2>
+        <p>Wheel over it to change picture.</p>
+        <section class="sx" id="c9">
+          <ul class="sx-in">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+          </ul>
+        </section>
+        <script>/* JS 09 */ $('#c9').sx({ dots: 1, wheel: 1 });</script>
+      </section>
+
+      <!-- ================= 10 Fade + autoplay + progress  (article > section > figure) ================= -->
+      <section class="demo">
+        <h2>10. Fade with autoplay and progress bar</h2>
+        <p>Pauses on hover.</p>
+        <article class="sx" id="c10">
+          <section class="sx-in">
+            <figure class="sl"><img data-ph="1" alt="Photo 1">
+              <figcaption class="cap">First caption</figcaption>
+            </figure>
+            <figure class="sl"><img data-ph="2" alt="Photo 2">
+              <figcaption class="cap">Second caption</figcaption>
+            </figure>
+            <figure class="sl"><img data-ph="3" alt="Photo 3">
+              <figcaption class="cap">Third caption</figcaption>
+            </figure>
+            <figure class="sl"><img data-ph="4" alt="Photo 4">
+              <figcaption class="cap">Fourth caption</figcaption>
+            </figure>
+          </section>
+        </article>
+        <script>/* JS 10 */ $('#c10').sx({ mode: 'fade', auto: 4000, bar: 1, dots: 1 });</script>
+      </section>
+
+      <!-- ================= 11 Ken Burns zoom  (aside > ol > li) ================= -->
+      <section class="demo">
+        <h2>11. Ken Burns zoom</h2>
+        <p>Slow zoom on the active picture.</p>
+        <aside class="sx" id="c11">
+          <ol class="sx-in">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+          </ol>
+        </aside>
+        <script>/* JS 11 */ $('#c11').sx({ mode: 'fade', cls: 'zoom', auto: 5000, dots: 1 });</script>
+      </section>
+
+      <!-- ================= 12 Thumbnail gallery  (section > ul > li) ================= -->
+      <section class="demo">
+        <h2>12. Thumbnail gallery</h2>
+        <p>Thumbnails are built from the slide images automatically.</p>
+        <section class="sx" id="c12">
+          <ul class="sx-in">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+            <li class="sl"><img data-ph="6" alt="Photo 6"></li>
+          </ul>
+        </section>
+        <script>/* JS 12 */ $('#c12').sx({ thumbs: 1 });</script>
+      </section>
+
+      <!-- ================= 13 Testimonials  (article > section > blockquote) ================= -->
+      <section class="demo">
+        <h2>13. Testimonials</h2>
+        <p>Fade slider with a round photo, quote and name.</p>
+        <article class="sx" id="c13">
+          <section class="sx-in">
+            <blockquote class="sl q"><img class="av" data-ph="1" alt="Asha">
+              <p>Smooth on my phone and fast on desktop.</p>
+              <footer>Asha, Delhi</footer>
+            </blockquote>
+            <blockquote class="sl q"><img class="av" data-ph="2" alt="Ravi">
+              <p>Dropped into our site in ten minutes.</p>
+              <footer>Ravi, Patna</footer>
+            </blockquote>
+            <blockquote class="sl q"><img class="av" data-ph="3" alt="Meera">
+              <p>Scrolling feels natural everywhere.</p>
+              <footer>Meera, Roorkee</footer>
+            </blockquote>
+          </section>
+        </article>
+        <script>/* JS 13 */ $('#c13').sx({ mode: 'fade', cls: 'qt', auto: 6000, dots: 1 });</script>
+      </section>
+
+      <!-- ================= 14 Loop + counter  (aside > ol > li) ================= -->
+      <section class="demo">
+        <h2>14. Wrap-around loop with counter</h2>
+        <p>Autoplay; goes from the last picture back to the first.</p>
+        <aside class="sx" id="c14">
+          <ol class="sx-in">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+          </ol>
+        </aside>
+        <script>/* JS 14 */ $('#c14').sx({ count: 1, auto: 3000 });</script>
+      </section>
+
+      <!-- ================= 15 Infinite marquee  (section > ul > li) ================= -->
+      <section class="demo">
+        <h2>15. Infinite marquee</h2>
+        <p>CSS animation. JS only duplicates the pictures so the loop has no gap.</p>
+        <section class="mq">
+          <ul class="mq-tr">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+          </ul>
+        </section>
+        <section class="mq rev">
+          <ul class="mq-tr">
+            <li class="sl"><img data-ph="6" alt="Photo 6"></li>
+            <li class="sl"><img data-ph="7" alt="Photo 7"></li>
+            <li class="sl"><img data-ph="8" alt="Photo 8"></li>
+            <li class="sl"><img data-ph="9" alt="Photo 9"></li>
+            <li class="sl"><img data-ph="10" alt="Photo 10"></li>
+          </ul>
+        </section>
+        <script>/* JS 15 */
+          $('.mq-tr').each(function () { var $t = $(this); $t.append($t.children().clone().attr('aria-hidden', 'true')); });
+        </script>
+      </section>
+
+      <!-- ================= 16 Page scroll moves it sideways  (article > section > ul) ================= -->
+      <section class="demo">
+        <h2>16. Page scroll moves it sideways</h2>
+        <p>Scroll the page down: vertical scrolling drives the horizontal movement.</p>
+        <article class="hs" id="c16">
+          <section class="hs-st">
+            <ul class="hs-tr">
+              <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+              <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+              <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+              <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+              <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+              <li class="sl"><img data-ph="6" alt="Photo 6"></li>
+            </ul>
+          </section>
+        </article>
+        <script>/* JS 16 */
+          (function () {
+            var hs = $('#c16')[0], st = $(hs).find('.hs-st')[0], tr = $(hs).find('.hs-tr')[0];
+            function f() {
+              var top = parseFloat(getComputedStyle(st).top), r = hs.getBoundingClientRect(),
+              p = Math.max(0, Math.min(1, (top - r.top) / (r.height - st.offsetHeight)));
+              tr.style.transform = 'translateX(' + (-p * Math.max(0, tr.scrollWidth - st.clientWidth)) + 'px)'
+            }
+            $(window).on('scroll resize', f); f();
+          })();
+        </script>
+      </section>
+
+      <!-- ================= 17 Stacked cards  (aside > ol > li) ================= -->
+      <section class="demo">
+        <h2>17. Stacked cards</h2>
+        <p>Click, swipe or wheel to send the top card to the back.</p>
+        <aside class="sx" id="c17">
+          <ol class="sx-in">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+          </ol>
+        </aside>
+        <script>/* JS 17 */ $('#c17').sx({ mode: 'stack', wheel: 1 });</script>
+      </section>
+
+      <!-- ================= 18 3D ring  (section > ul > li) ================= -->
+      <section class="demo">
+        <h2>18. 3D ring</h2>
+        <p>Pictures sit on a rotating ring.</p>
+        <section class="sx" id="c18">
+          <ul class="sx-in">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+            <li class="sl"><img data-ph="6" alt="Photo 6"></li>
+          </ul>
+        </section>
+        <script>/* JS 18 */ $('#c18').sx({ mode: 'ring', wheel: 1 });</script>
+      </section>
+
+      <!-- ================= 19 Expanding panels  (section > figure) ================= -->
+      <section class="demo">
+        <h2>19. Expanding panels</h2>
+        <p>Click a panel or use the wheel. Stacks vertically on phones.</p>
+        <section class="acc" id="c19">
+          <figure class="sl on"><img data-ph="1" alt="Photo 1">
+            <figcaption class="cap">Panel 1</figcaption>
+          </figure>
+          <figure class="sl"><img data-ph="2" alt="Photo 2">
+            <figcaption class="cap">Panel 2</figcaption>
+          </figure>
+          <figure class="sl"><img data-ph="3" alt="Photo 3">
+            <figcaption class="cap">Panel 3</figcaption>
+          </figure>
+          <figure class="sl"><img data-ph="4" alt="Photo 4">
+            <figcaption class="cap">Panel 4</figcaption>
+          </figure>
+          <figure class="sl"><img data-ph="5" alt="Photo 5">
+            <figcaption class="cap">Panel 5</figcaption>
+          </figure>
+        </section>
+        <script>/* JS 19 */
+          (function () {
+            var $a = $('#c19'), $p = $a.children(), lk = 0;
+            function on(j) { $p.removeClass('on').eq(j).addClass('on') }
+            $p.click(function () { on($p.index(this)) });
+            $a.on('wheel', function (e) {
+              var d = e.originalEvent.deltaY, j = $p.index($p.filter('.on')) + (d > 0 ? 1 : -1);
+              if (!d || lk || j < 0 || j >= $p.length) return; e.preventDefault(); lk = 1; setTimeout(function () { lk = 0 }, 400); on(j)
+            })
+          })();
+        </script>
+      </section>
+
+      <!-- ================= 20 Scroll progress bar  (article > ul > li + progress) ================= -->
+      <section class="demo">
+        <h2>20. Scroll progress bar</h2>
+        <p>A native &lt;progress&gt; element fills as you scroll through the pictures.</p>
+        <article class="box" id="c20">
+          <ul class="trk cards">
+            <li class="sl"><img data-ph="1" alt="Photo 1"></li>
+            <li class="sl"><img data-ph="2" alt="Photo 2"></li>
+            <li class="sl"><img data-ph="3" alt="Photo 3"></li>
+            <li class="sl"><img data-ph="4" alt="Photo 4"></li>
+            <li class="sl"><img data-ph="5" alt="Photo 5"></li>
+            <li class="sl"><img data-ph="6" alt="Photo 6"></li>
+            <li class="sl"><img data-ph="7" alt="Photo 7"></li>
+            <li class="sl"><img data-ph="8" alt="Photo 8"></li>
+          </ul>
+        </article>
+        <progress class="pg" id="pg20" max="100" value="0"></progress>
+        <script>/* JS 20 */
+          (function () {
+            var t = $('#c20 .trk'), el = t[0], pg = $('#pg20')[0];
+            function f() { pg.value = (el.scrollLeft + el.clientWidth) / el.scrollWidth * 100 }
+            t.on('scroll', f); $(window).on('resize', f); f(); nat('#c20');
+          })();
+        </script>
+      </section>
+
+    </main>
+  </body>
+
+  </html>

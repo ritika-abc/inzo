@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>20 Responsive Carousels (CSS + JS + jQuery)</title>
+  <style>
+    :root {
+      --bg: #f4f5f7;
+      --fg: #14181f;
+      --mut: #5b6472;
+      --ac: #0f766e;
+      --bd: #d9dde3;
+      --card: #fff
+    }
+
+    @media(prefers-color-scheme:dark) {
+      :root {
+        --bg: #0e1116;
+        --fg: #e9ecf1;
+        --mut: #9aa3b2;
+        --bd: #2a313c;
+        --ac: #2dd4bf;
+        --card: #171c25
+      }
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif
+    }
+
+    header {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 16px 8px
+    }
+
+    h1 {
+      margin: 0 0 6px;
+      font-size: clamp(1.6rem, 5vw, 2.4rem)
+    }
+
+    header p,
+    .demo p {
+      margin: 0 0 12px;
+      color: var(--mut)
+    }
+
+    .demo {
+      max-width: 1100px;
+      margin: 0 auto 44px;
+      padding: 0 16px
+    }
+
+    .demo h2 {
+      margin: 0 0 2px;
+      font-size: 1.15rem
+    }
+
+    button:focus-visible {
+      outline: 3px solid var(--ac);
+      outline-offset: 2px
+    }
+
+    /* ===== shared slide ===== */
+    .s {
+      --h: 200;
+      background: linear-gradient(135deg, hsl(var(--h) 65% 50%), hsl(calc(var(--h) + 50) 65% 38%));
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 700;
+      font-size: clamp(1.2rem, 4vw, 2rem);
+      border-radius: 14px;
+      min-height: 220px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden
+    }
+
+    .w {
+      position: relative
+    }
+
+    .ar {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .55);
+      color: #fff;
+      font-size: 22px;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 5
+    }
+
+    .ar.p {
+      left: 8px
+    }
+
+    .ar.n {
+      right: 8px
+    }
+
+    /* ===== 01-08, 20: native scroll-snap tracks ===== */
+    .track {
+      position: relative;
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      scrollbar-width: thin;
+      overscroll-behavior-x: contain
+    }
+
+    .track.ns {
+      scroll-snap-type: none !important
+    }
+
+    .track>.s {
+      flex: 0 0 100%;
+      scroll-snap-align: start
+    }
+
+    .cards {
+      --n: 1
+    }
+
+    .cards>.s {
+      flex-basis: calc((100% - (var(--n) - 1)*12px)/var(--n))
+    }
+
+    @media(min-width:600px) {
+      .cards {
+        --n: 2
+      }
+    }
+
+    @media(min-width:900px) {
+      .cards {
+        --n: 3
+      }
+    }
+
+    @media(min-width:1100px) {
+      .cards {
+        --n: 4
+      }
+    }
+
+    .peek {
+      padding: 0 10%
+    }
+
+    .peek>.s {
+      flex-basis: 80%;
+      scroll-snap-align: center
+    }
+
+    .v {
+      flex-direction: column;
+      overflow-x: hidden;
+      overflow-y: auto;
+      height: 260px;
+      scroll-snap-type: y mandatory
+    }
+
+    .v>.s {
+      flex: 0 0 100%;
+      scroll-snap-align: start
+    }
+
+    .fx {
+      perspective: 900px;
+      gap: 0;
+      padding: 24px calc(50% - 120px)
+    }
+
+    .fx>.s {
+      flex: 0 0 240px;
+      scroll-snap-align: center;
+      will-change: transform
+    }
+
+    .drag {
+      cursor: grab;
+      user-select: none
+    }
+
+    .drag.on {
+      cursor: grabbing
+    }
+
+    .par .in {
+      display: block;
+      font-size: 2.4rem;
+      will-change: transform
+    }
+
+    .pbar {
+      height: 4px;
+      margin-top: 10px;
+      background: var(--bd);
+      border-radius: 2px
+    }
+
+    .pbar i {
+      display: block;
+      height: 100%;
+      width: 0;
+      background: var(--ac);
+      border-radius: 2px
+    }
+
+    /* ===== 09-14, 17-18: jQuery slider ===== */
+    .sl {
+      position: relative;
+      overflow: hidden;
+      border-radius: 14px;
+      touch-action: pan-y
+    }
+
+    .sl-in {
+      display: flex;
+      transition: transform .6s cubic-bezier(.2, .7, .2, 1)
+    }
+
+    .sl .s {
+      flex: 0 0 100%;
+      border-radius: 0;
+      min-height: 240px
+    }
+
+    .sl.fade .sl-in,
+    .sl.stack .sl-in,
+    .sl.ring .sl-in {
+      display: block;
+      position: relative
+    }
+
+    .sl.fade .sl-in {
+      height: 260px
+    }
+
+    .sl.fade .s {
+      position: absolute;
+      inset: 0;
+      min-height: 0;
+      opacity: 0;
+      transition: opacity .8s
+    }
+
+    .sl.fade .s.on {
+      opacity: 1
+    }
+
+    .sl.zoom .s {
+      background: linear-gradient(135deg, hsl(var(--h) 65% 50%), hsl(calc(var(--h) + 50) 65% 38%))
+    }
+
+    .bg {
+      position: absolute;
+      inset: 0;
+      background: inherit;
+      transform: scale(1);
+      transition: transform 7s linear
+    }
+
+    .on .bg {
+      transform: scale(1.2)
+    }
+
+    .s em {
+      position: relative;
+      font-style: normal
+    }
+
+    .dots {
+      position: absolute;
+      bottom: 10px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      z-index: 4
+    }
+
+    .dots b {
+      width: 10px;
+      height: 10px;
+      border-radius: 99px;
+      background: rgba(255, 255, 255, .55);
+      cursor: pointer;
+      transition: width .3s
+    }
+
+    .dots b.on {
+      background: #fff;
+      width: 26px
+    }
+
+    .pb {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 4px;
+      background: #fff;
+      width: 0;
+      z-index: 4
+    }
+
+    .cnt {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      z-index: 4;
+      background: rgba(0, 0, 0, .55);
+      color: #fff;
+      border-radius: 99px;
+      padding: 2px 12px;
+      font-size: .8rem
+    }
+
+    .th {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      overflow-x: auto
+    }
+
+    .th b {
+      flex: 0 0 76px;
+      height: 50px;
+      border-radius: 8px;
+      cursor: pointer;
+      opacity: .5;
+      background: hsl(var(--h) 65% 45%)
+    }
+
+    .th b.on {
+      opacity: 1;
+      outline: 2px solid var(--ac);
+      outline-offset: 2px
+    }
+
+    .s.q {
+      background: var(--card);
+      color: var(--fg);
+      flex-direction: column;
+      font-weight: 500;
+      font-size: clamp(1rem, 3vw, 1.3rem);
+      border: 1px solid var(--bd)
+    }
+
+    .s.q small {
+      display: block;
+      color: var(--mut);
+      margin-top: 10px;
+      font-size: .85rem
+    }
+
+    .qt .dots b {
+      background: var(--bd)
+    }
+
+    .qt .dots b.on {
+      background: var(--ac)
+    }
+
+    .sl.stack,
+    .sl.ring {
+      overflow: visible
+    }
+
+    .sl.stack {
+      height: 270px
+    }
+
+    .sl.stack .sl-in {
+      height: 240px;
+      margin-right: 50px
+    }
+
+    .sl.stack .s {
+      position: absolute;
+      inset: 0;
+      min-height: 0;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform .5s, opacity .5s
+    }
+
+    .sl.ring {
+      height: 270px;
+      perspective: 900px
+    }
+
+    .sl.ring .sl-in {
+      width: 200px;
+      height: 220px;
+      margin: 24px auto;
+      transform-style: preserve-3d;
+      transition: transform .8s
+    }
+
+    .sl.ring .s {
+      position: absolute;
+      inset: 0;
+      min-height: 0;
+      border-radius: 14px;
+      backface-visibility: hidden
+    }
+
+    /* ===== 15: marquee (CSS only) ===== */
+    .mq {
+      overflow: hidden;
+      margin-bottom: 12px
+    }
+
+    .mq-tr {
+      display: flex;
+      gap: 12px;
+      width: max-content;
+      animation: mq 30s linear infinite
+    }
+
+    .mq:hover .mq-tr {
+      animation-play-state: paused
+    }
+
+    .mq.rev .mq-tr {
+      animation-direction: reverse
+    }
+
+    .mq .s {
+      flex: 0 0 200px;
+      min-height: 110px
+    }
+
+    @keyframes mq {
+      to {
+        transform: translateX(calc(-50% - 6px))
+      }
+    }
+
+    /* ===== 16: page scroll drives sideways movement ===== */
+    .hs {
+      height: 260vh;
+      position: relative
+    }
+
+    .hs-st {
+      position: sticky;
+      top: 12vh;
+      height: 76vh;
+      overflow: hidden;
+      display: flex;
+      align-items: center
+    }
+
+    .hs-tr {
+      display: flex;
+      gap: 16px;
+      width: max-content;
+      will-change: transform
+    }
+
+    .hs-tr .s {
+      flex: 0 0 min(70vw, 340px);
+      min-height: 50vh
+    }
+
+    /* ===== 19: expanding panels ===== */
+    .acc {
+      display: flex;
+      gap: 8px;
+      height: 280px
+    }
+
+    .acc .s {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      flex-direction: column;
+      cursor: pointer;
+      transition: flex .5s
+    }
+
+    .acc .s.on {
+      flex: 4
+    }
+
+    .acc em {
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .4s
+    }
+
+    .acc .on em {
+      opacity: 1
+    }
+
+    @media(max-width:600px) {
+      .acc {
+        flex-direction: column;
+        height: 380px
+      }
+    }
+
+    @media(prefers-reduced-motion:reduce) {
+      * {
+        animation: none !important;
+        transition: none !important
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>20 responsive carousels</h1>
+    <p>CSS + vanilla JS + jQuery 3.7, no plugins. Scroll, swipe or drag each one. The mouse wheel over a carousel moves
+      it sideways; page scroll continues at the ends. Replace the demo slides with your own <code>.s</code> blocks.</p>
+  </header>
+  <main id="app"></main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script>
+    /* ---------- jQuery slider plugin: slide | fade | stack | ring ---------- */
+    $.fn.sl = function (o) {
+      o = o || {}; return this.each(function () {
+        var m = o.mode || 'slide', $r = $(this).addClass(m + ' ' + (o.cls || '')), $in = $r.find('.sl-in'), $s = $in.children(),
+          n = $s.length, i = 0, tm, sx, $d, $pb, $th, $c;
+        function go(k) { i = (k + n) % n; draw() }
+        function draw() {
+          $s.removeClass('on').eq(i).addClass('on');
+          if (m == 'slide') $in.css('transform', 'translateX(' + (-i * 100) + '%)');
+          if (m == 'stack') $s.each(function (k) {
+            var d = (k - i + n) % n;
+            $(this).css({ zIndex: n - d, opacity: d > 3 ? 0 : 1, transform: 'translate(' + d * 14 + 'px,' + d * 10 + 'px) scale(' + (1 - d * .05) + ')' })
+          });
+          if (m == 'ring') {
+            var a = 360 / n; $in.css('transform', 'translateZ(-190px) rotateY(' + (-i * a) + 'deg)');
+            $s.each(function (k) { $(this).css('transform', 'rotateY(' + k * a + 'deg) translateZ(190px)') })
+          }
+          if ($d) $d.children().removeClass('on').eq(i).addClass('on');
+          if ($th) $th.children().removeClass('on').eq(i).addClass('on');
+          if ($c) $c.text((i + 1) + ' / ' + n);
+          if (o.auto) {
+            clearTimeout(tm);
+            if ($pb) $pb.stop(true).css('width', 0).animate({ width: '100%' }, o.auto, 'linear');
+            tm = setTimeout(function () { go(i + 1) }, o.auto)
+          }
+        }
+        $r.append($('<button class="ar p" aria-label="Previous">&#8249;</button>').click(function () { go(i - 1) }),
+          $('<button class="ar n" aria-label="Next">&#8250;</button>').click(function () { go(i + 1) }));
+        if (o.dots) { $d = $('<div class="dots"/>'); $s.each(function (k) { $d.append($('<b/>').click(function () { go(k) })) }); $r.append($d) }
+        if (o.bar) { $pb = $('<div class="pb"/>'); $r.append($pb) }
+        if (o.count) { $c = $('<span class="cnt"/>'); $r.append($c) }
+        if (o.thumbs) {
+          $th = $('<div class="th"/>').insertAfter($r);
+          $s.each(function (k) { $th.append($('<b style="--h:' + ((k * 47 + 200) % 360) + '"/>').click(function () { go(k) })) })
+        }
+        if (m == 'stack') $s.click(function () { go(i + 1) });
+        if (o.auto) $r.on('mouseenter', function () { clearTimeout(tm); if ($pb) $pb.stop(true) }).on('mouseleave', draw);
+        $r.on('touchstart', function (e) { sx = e.originalEvent.touches[0].clientX })
+          .on('touchend', function (e) { var dx = e.originalEvent.changedTouches[0].clientX - sx; if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1)) });
+        if (o.wheel) {
+          var lk = 0; $r.on('wheel', function (e) {
+            var d = e.originalEvent.deltaY; if (!d || lk) return;
+            e.preventDefault(); lk = 1; setTimeout(function () { lk = 0 }, 600); go(i + (d > 0 ? 1 : -1))
+          })
+        }
+        draw();
+      })
+    };
+
+    /* ---------- demo content helpers ---------- */
+    var H = function (i) { return (i * 47 + 200) % 360 };
+    var S = function (n, f, c) { var o = ''; for (var i = 0; i < n; i++)o += '<div class="s ' + (c || '') + '" style="--h:' + H(i) + '">' + (f ? f(i) : 'Slide ' + (i + 1)) + '</div>'; return o };
+    var T = function (c, n, f) { return '<div class="w"><div class="track ' + c + '">' + S(n, f) + '</div></div>' };
+    var L = function (n, f, c) { return '<div class="w"><div class="sl"><div class="sl-in">' + S(n || 5, f, c) + '</div></div></div>' };
+    var QT = ['Smooth on my phone and fast on desktop.', 'Dropped into our site in ten minutes.', 'Scrolling feels natural everywhere.'],
+      NM = ['Asha, Delhi', 'Ravi, Patna', 'Meera, Roorkee'];
+
+    var D = [
+/*01*/['Native scroll-snap', 'Pure CSS. Swipe, trackpad, scrollbar, or wheel over it.', T('', 5)],
+/*02*/['Responsive cards', '1 / 2 / 3 / 4 cards per view depending on screen width.', T('cards', 8)],
+/*03*/['Peek carousel', 'Centered slide with neighbours peeking in.', T('peek', 5)],
+/*04*/['Vertical scroll-snap', 'Scrolls up and down inside a fixed-height box.', '<div class="w"><div class="track v">' + S(5) + '</div></div>'],
+/*05*/['Coverflow (scroll-linked 3D)', 'Rotation and scale follow the scroll position.', T('fx cover', 7)],
+/*06*/['Scale on center', 'The slide nearest the middle grows; the others shrink and fade.', T('fx scl', 7)],
+/*07*/['Drag to scroll', 'Grab with the mouse and drag. Touch uses native swipe.', T('cards drag', 8)],
+/*08*/['Parallax text', 'Text inside each slide moves at a different speed than the slide.', T('peek par', 5, function (i) { return '<span class="in">Slide ' + (i + 1) + '</span>' })],
+/*09*/['jQuery slider: arrows, dots, swipe, wheel', 'Wheel over it to change slide.', L(), function (e) { e.find('.sl').sl({ dots: 1, wheel: 1 }) }],
+/*10*/['Fade with autoplay and progress bar', 'Pauses on hover.', L(), function (e) { e.find('.sl').sl({ mode: 'fade', auto: 4000, bar: 1, dots: 1 }) }],
+/*11*/['Ken Burns zoom', 'Slow zoom on every slide while it is active.', L(4, function (i) { return '<u class="bg"></u><em>Caption ' + (i + 1) + '</em>' }), function (e) { e.find('.sl').sl({ mode: 'fade', cls: 'zoom', auto: 5000, dots: 1 }) }],
+/*12*/['Thumbnail gallery', 'Click a thumbnail to jump to that slide.', L(6), function (e) { e.find('.sl').sl({ thumbs: 1 }) }],
+/*13*/['Testimonials', 'Fade slider with text slides.', L(3, function (i) { return '&ldquo;' + QT[i] + '&rdquo;<small>' + NM[i] + '</small>' }, 'q'), function (e) { e.find('.sl').sl({ mode: 'fade', cls: 'qt', auto: 6000, dots: 1 }) }],
+/*14*/['Wrap-around loop with counter', 'Autoplay, wraps from last slide back to first.', L(), function (e) { e.find('.sl').sl({ count: 1, auto: 3000 }) }],
+/*15*/['Infinite marquee', 'CSS only. Two rows in opposite directions, pause on hover.', '<div class="mq"><div class="mq-tr">' + S(8) + S(8) + '</div></div><div class="mq rev"><div class="mq-tr">' + S(8) + S(8) + '</div></div>'],
+/*16*/['Page scroll moves it sideways', 'Scroll the page down: vertical scrolling drives the horizontal movement.', '<div class="hs"><div class="hs-st"><div class="hs-tr">' + S(6) + '</div></div></div>'],
+/*17*/['Stacked cards', 'Click, swipe, or wheel to send the top card to the back.', L(), function (e) { e.find('.sl').sl({ mode: 'stack', wheel: 1 }) }],
+/*18*/['3D ring', 'Cards sit on a rotating ring.', L(6), function (e) { e.find('.sl').sl({ mode: 'ring', wheel: 1 }) }],
+/*19*/['Expanding panels', 'Click a panel or use the wheel. Stacks vertically on phones.', '<div class="acc">' + S(5, function (i) { return '<b>' + (i + 1) + '</b><em>Panel ' + (i + 1) + '</em>' }) + '</div>', function (e) {
+        var $p = e.find('.acc .s'), lk = 0; $p.first().addClass('on');
+        $p.click(function () { $p.removeClass('on'); $(this).addClass('on') });
+        e.find('.acc').on('wheel', function (ev) {
+          var d = ev.originalEvent.deltaY, j = $p.index($p.filter('.on')) + (d > 0 ? 1 : -1);
+          if (!d || lk || j < 0 || j >= $p.length) return; ev.preventDefault(); lk = 1; setTimeout(function () { lk = 0 }, 400); $p.removeClass('on').eq(j).addClass('on')
+        })
+      }],
+/*20*/['Scroll progress bar', 'The bar fills as you scroll through the cards.', T('cards pr', 8) + '<div class="pbar"><i></i></div>']
+    ];
+
+    $.each(D, function (k, d) {
+      var $e = $('<section class="demo"><h2>' + (k + 1) + '. ' + d[0] + '</h2><p>' + d[1] + '</p>' + d[2] + '</section>').appendTo('#app');
+      if (d[3]) d[3]($e);
+    });
+
+    /* ---------- native tracks: arrows, wheel to sideways ---------- */
+    function wheelX(e) {
+      var o = e.originalEvent, el = this, mx = el.scrollWidth - el.clientWidth, l = el.scrollLeft;
+      if (Math.abs(o.deltaY) <= Math.abs(o.deltaX) || mx <= 0) return;
+      if ((o.deltaY > 0 && l < mx - 1) || (o.deltaY < 0 && l > 0)) {
+        e.preventDefault();
+        $(el).addClass('ns'); clearTimeout(el._t); el._t = setTimeout(function () { $(el).removeClass('ns') }, 160);
+        el.scrollLeft = l + o.deltaY
+      }
+    }
+    $('.track:not(.v)').on('wheel', wheelX);
+    $('.w').has('.track:not(.v)').each(function () {
+      var $w = $(this), t = $w.find('.track')[0];
+      $w.append($('<button class="ar p" aria-label="Previous">&#8249;</button>').click(function () { t.scrollBy({ left: -t.clientWidth * .8, behavior: 'smooth' }) }),
+        $('<button class="ar n" aria-label="Next">&#8250;</button>').click(function () { t.scrollBy({ left: t.clientWidth * .8, behavior: 'smooth' }) }))
+    });
+
+    /* ---------- 07 drag to scroll ---------- */
+    $('.drag').on('mousedown', function (e) {
+      var el = this, x = e.pageX, l = el.scrollLeft; $(el).addClass('ns on');
+      $(document).on('mousemove.d', function (e) { el.scrollLeft = l - (e.pageX - x) })
+        .one('mouseup', function () { $(document).off('mousemove.d'); $(el).removeClass('ns on') })
+    });
+
+    /* ---------- 05, 06, 08 scroll-linked effects ---------- */
+    $('.fx,.par').each(function () {
+      var el = this, $el = $(el), cv = $el.hasClass('cover'), pa = $el.hasClass('par');
+      function f() {
+        $el.children().each(function () {
+          var d = (this.offsetLeft + this.offsetWidth / 2 - el.scrollLeft - el.clientWidth / 2) / this.offsetWidth, a = Math.abs(d);
+          if (pa) { $(this).find('.in').css('transform', 'translateX(' + (-d * 70) + 'px)'); return }
+          this.style.transform = cv ? 'rotateY(' + (-Math.max(-1.5, Math.min(1.5, d)) * 40) + 'deg) scale(' + (1 - Math.min(a, 1.5) * .12) + ')'
+            : 'scale(' + (1 - Math.min(a, 1) * .25) + ')';
+          this.style.opacity = 1 - Math.min(a, 1.5) * .3
+        })
+      }
+      $el.on('scroll', f); $(window).on('resize', f); f()
+    });
+
+    /* ---------- 20 progress bar ---------- */
+    $('.pr').each(function () {
+      var el = this, $b = $(el).parent().next('.pbar').children();
+      function f() { $b.css('width', (el.scrollLeft + el.clientWidth) / el.scrollWidth * 100 + '%') }
+      $(el).on('scroll', f); $(window).on('resize', f); f()
+    });
+
+    /* ---------- 16 page scroll drives horizontal movement ---------- */
+    function hs() {
+      $('.hs').each(function () {
+        var st = $(this).find('.hs-st')[0], tr = $(this).find('.hs-tr')[0], top = parseFloat(getComputedStyle(st).top),
+          r = this.getBoundingClientRect(), p = Math.max(0, Math.min(1, (top - r.top) / (r.height - st.offsetHeight)));
+        tr.style.transform = 'translateX(' + (-p * Math.max(0, tr.scrollWidth - st.clientWidth)) + 'px)'
+      })
+    }
+    $(window).on('scroll resize', hs); hs();
+  </script>
+</body>
+
+</html>
