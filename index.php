@@ -1,49 +1,7 @@
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>INZO Impex | Premium Agro Products Exporter, Purnia, Bihar</title>
-  <meta name="description"
-    content="INZO Impex trades and exports premium maize, paddy, makhana (fox nut), spices and jaggery from Bihar, India to the world.">
-  <meta property="og:title" content="INZO Impex | Trading & Export of Premium Food & Agro Products">
-  <meta property="og:type" content="website">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,600;9..144,800&display=swap"
-    rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
-  <link rel="stylesheet" href="assets/css/carohsel.css">
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-  <script src="assets/js/carousel.js"></script>
-</head>
-
-<body>
-  <nav class="navbar navbar-expand-lg fixed-top" aria-label="Main navigation">
-    <div class="container">
-      <a class="navbar-brand brand" href="#home"><img src="assets/image/logo/logo.png" class="bg-white rounded" height="80px" alt=""></a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav"
-        aria-expanded="false" aria-label="Toggle menu"><span class="navbar-toggler-icon"></span></button>
-      <div class="collapse navbar-collapse" id="nav">
-        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
-          <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="#services">Services</a></li>
-          <li class="nav-item"><a class="nav-link" href="#why">Why Us</a></li>
-          <li class="nav-item"><a class="nav-link" href="#history">History</a></li>
-          <li class="nav-item"><a class="nav-link" href="#ceo">CEO Words</a></li>
-          <li class="nav-item"><a class="nav-link" href="#products">Products</a></li>
-          <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
-          <li class="nav-item ms-lg-2 mt-2 mt-lg-0"><button class="theme-btn" id="theme"
-              aria-label="Toggle dark or light mode"><i class="fa-solid fa-moon"></i></button></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
+   <?php
+include "nav.php";
+  ?>
   <main>
     <header class="hero" id="home">
       <div class="hero-bg" data-speed=".25"></div><canvas id="particles" aria-hidden="true"></canvas>
@@ -63,13 +21,12 @@
               <div class="orb"></div>
               <div class="orb2"><i class="fa-solid fa-wheat-awn"></i></div>
             </div> -->
-            <img src="1.png" class="rot" height="auto" width="100%" alt="">
+            <img src="assets/image/shape.png" class="rot" height="auto" width="100%" alt="">
           </div>
         </div>
       </div>
     </header>
-
-    <div class="container stats">
+  <div class="container stats">
       <div class="row g-3 g-lg-4">
         <div class="col-6 col-lg-3 rv">
           <div class="stat"><i class="fa-solid fa-medal"></i>
@@ -94,6 +51,8 @@
       </div>
     </div>
 
+
+
     <section id="about">
       <div class="container">
         <div class="row align-items-center g-5">
@@ -107,7 +66,7 @@
             <div class="bar"></div>
             <p>INZO Impex is engaged in the trading and export of high-quality food and agro-based products. The company
               specializes in sourcing, processing, and international distribution of premium grains, with a core focus
-              on maize and paddy. The company also deals in spices including cardamom, clove, and black pepper.</p>
+              on maize  . The company also deals in spices including cardamom, clove, and black pepper.</p>
             <ul class="tick ps-0 mt-3">
               <li><i class="fa-solid fa-circle-check"></i>Direct sourcing from farming communities</li>
               <li><i class="fa-solid fa-circle-check"></i>Careful cleaning, grading and packing</li>
@@ -118,6 +77,17 @@
       </div>
     </section>
 
+    <style>
+      .bg{
+        margin: 3rem 0rem;
+        background-image: url('assets/image/b1.png');
+        height: 500px;
+        width: 100%;
+        background-size: cover;
+        background-attachment: fixed;
+      }
+    </style>
+    <div class="bg"></div>
     <section id="services" class="alt">
       <div class="container">
         <div class="text-center rv">
@@ -130,7 +100,7 @@
             <div class="f-card">
               <div class="ic"><i class="fa-solid fa-magnifying-glass-location"></i></div>
               <h4>Sourcing</h4>
-              <p>Maize, paddy and spices selected at origin from trusted growers.</p>
+              <p>Maize  and spices selected at origin from trusted growers.</p>
             </div>
           </div>
           <div class="col-md-6 col-lg-3 rv">
@@ -219,13 +189,7 @@
 
 
 
-
-
-
-
-
-
-
+ 
 
     <!-- <section class="demo">
        
@@ -320,7 +284,7 @@
           <div class="tl-item rv">
             <div class="tl-box">
               <h4>Grain Focus</h4>
-              <p>Built expertise in maize and paddy sourcing and processing.</p>
+              <p>Built expertise in maize  sourcing and processing.</p>
             </div>
           </div>
           <div class="tl-item rv">
@@ -422,9 +386,11 @@
             <div class="c-info">
               <h3 class="h4 mb-4">INZO Impex</h3>
               <ul class="p-0">
-                <li><i class="fa-solid fa-phone"></i><a href="tel:+919163543343">+91 9163543343</a></li>
+                <li><i class="fa-solid fa-phone"></i><a href="tel:+91 9661899367">+91 9661899367</a></li>
                 <li><i class="fa-solid fa-envelope"></i><a
                     href="mailto:tanzirakhtar@gmail.com">tanzirakhtar@gmail.com</a></li>
+                <li><i class="fa-solid fa-envelope"></i><a
+                    href="mailto:enquiry@inzoimpex.com">enquiry@inzoimpex.com</a></li>
                 <li><i class="fa-solid fa-location-dot"></i>
                   <address class="mb-0">Madrsa Chowk, Ward no – 10, Garhbanaili, Kasba, Ghordaur, Post Office:
                     Garhbanaili, District: Purnia, Bihar – 854325</address>
@@ -450,7 +416,7 @@
                   class="form-select" required>
                   <option value="">Choose a product</option>
                   <option>Maize</option>
-                  <option>Paddy</option>
+                 
                   <option>Fox Nut (Makhana)</option>
                   <option>Spices</option>
                   <option>Jaggery</option>
@@ -472,45 +438,7 @@
     </section>
   </main>
 
-  <footer>
-    <div class="container">
-      <div class="row g-4">
-        <div class="col-lg-5"><a class="brand" href="#home"><img src="assets/image/logo/logo.png" class="bg-white rounded" height="80px" alt=""></a>
-          <p class="mt-3">Trading &amp; export of premium food and agro-based products from Bihar, India.</p>
-          <div class="soc"><a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a><a href="#"
-              aria-label="Instagram"><i class="fab fa-instagram"></i></a><a href="#" aria-label="LinkedIn"><i
-                class="fab fa-linkedin-in"></i></a><a href="https://wa.me/919163543343" aria-label="WhatsApp"><i
-                class="fab fa-whatsapp"></i></a></div>
-        </div>
-        <div class="col-6 col-lg-3">
-          <h5>Explore</h5>
-          <ul class="list-unstyled">
-            <li><a href="#about">About</a></li>
-            <li><a href="#services">Services</a></li>
-            <li><a href="#products">Products</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div>
-        <div class="col-6 col-lg-4">
-          <h5>Products</h5>
-          <ul class="list-unstyled">
-            <li>Maize &amp; Paddy</li>
-            <li>Fox Nut (Makhana)</li>
-            <li>Cardamom, Clove, Black Pepper</li>
-            <li>Jaggery</li>
-          </ul>
-        </div>
-      </div>
-      <hr style="border-color:#1f3a2d" class="mt-4">
-      <p class="text-center small mb-0">&copy; <span id="yr"></span> INZO Impex. All rights reserved.</p>
-    </div>
-  </footer>
-  <button id="top" aria-label="Scroll to top"><i class="fa-solid fa-chevron-up"></i></button>
 
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <script src="assets/js/js.js"></script>
-</body>
-
-</html>
+  <?php
+include "footer.php";
+  ?>
